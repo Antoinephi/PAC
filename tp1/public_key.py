@@ -3,6 +3,8 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import json
+import time
+import subprocess
 
 ### adresse du serveur de TP
 BASE_URL = "http://pac.bouillaguet.info/TP1"
@@ -36,8 +38,7 @@ def server_query( url, parameters=None ):
         if parameters is not None:
             data = json.dumps(parameters).encode(ENCODING)
             request.add_header('Content-type', 'application/json')
-        opener = urllib.request.FancyURLopener({})
-        with opener.open(request, data) as connexion:
+        with urllib.request.urlopen(request, data) as connexion:
             result = connexion.read().decode(ENCODING)
             if connexion.info()['Content-Type'] == "application/json":
                 result = json.loads(result)
@@ -47,8 +48,35 @@ def server_query( url, parameters=None ):
         print('the server also says: ' + e.read().decode(ENCODING))
 
 
+class DecryptionError(Exception):
+    pass
+
+def enc(msg, cipher="aes-128-cbc", passphrase=None, base64=True, decrypt=False):
+    """invoke the OpenSSL library (though the openssl executable which must be
+       present on your system to encrypt or decrypt content using a symmetric cipher."""
+
+    args = ["openssl", "enc", "-" + cipher]
+    if base64:
+        args.append("-base64")
+    if passphrase:
+        args.append("-k")
+        args.append(passphrase)
+    if decrypt:
+        args.append('-d')
+    result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = result.communicate(msg.encode(ENCODING))
+    if stderr == "bad decrypt\n":
+        raise DecryptionError()
+    return stdout.decode(ENCODING)
 
 
-parameters = {'login': 'philippe', 'token': '5e13344a408d884f3a182c88227ed0e5'}
-reponse = server_query(BASE_URL + '/encryption-101/validate/philippe', parameters)
-print(reponse)
+
+############### Script ##################
+
+
+public_key = server_query(BASE_URL +  '/public-key-101/get-PK')
+print(public_key);
+if public_key != None: 
+    f = open('pk.pub', 'w')
+    f.write(public_key)
+    f.close()
