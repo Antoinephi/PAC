@@ -70,13 +70,22 @@ def enc(msg, cipher="aes-128-cbc", passphrase=None, base64=True, decrypt=False):
     return stdout.decode(ENCODING)
 
 
+def enc_rsa(msg, pk_file):
+    args = ["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk_file, "|", "base64", "--break", "80"]
+    result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = result.communicate(msg.encode(ENCODING))
+    return stdout
+
 
 ############### Script ##################
 
 
 public_key = server_query(BASE_URL +  '/public-key-101/get-PK')
-print(public_key);
-if public_key != None: 
-    f = open('pk.pub', 'w')
+#public_key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkz8bHLw65rED1AuU1wJl 6P3ppkx743psQi3bNhvVcarJzqXyAdwoJdYYSXxmIqXIlg60uexll5+HFBXeTLaP gS00iP9e+Yd5kORcxK/BraVDql4JP2HBBztlGz51Ch283J5pfIIt2gHCmqLds7c6 2+kF6bsDBKSUb++orY2auhzKwvMomH0rVcjeSpnkDsPu8ediYm2LO7HNqMMGT2OL dsL5Huf+tHEBYjAfUoVVF10nJ938RxpzPXMJXEKl1n/cibiXz5t0TkJKywXWq4va dJoeEm/8mA+lGH7rtwU0XiSWWsqN7jk2NKVHYtB0kESnTwXMHZR4skAbCEayRx2y JwIDAQAB"
+"""if public_key != None: 
+    f = open('pk2.pub', 'w')
     f.write(public_key)
-    f.close()
+    f.close()"""
+
+result = enc_rsa("Hi, how are you?", "pk2.pub")
+print(result)
