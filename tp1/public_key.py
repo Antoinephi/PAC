@@ -71,9 +71,12 @@ def enc(msg, cipher="aes-128-cbc", passphrase=None, base64=True, decrypt=False):
 
 
 def enc_rsa(msg, pk_file):
-    args = ["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk_file, "|", "base64", "--break", "80"]
+    args = ["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk_file]
     result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = result.communicate(msg.encode(ENCODING))
+    args = ["base64"]
+    result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout = result.communicate(stdout)
     return stdout
 
 
@@ -88,4 +91,6 @@ public_key = server_query(BASE_URL +  '/public-key-101/get-PK')
     f.close()"""
 
 result = enc_rsa("Hi, how are you?", "pk2.pub")
-print(result)
+print(result[0])
+parameters = {'ciphertext', result[0]}
+server_query(BASE_URL + '/public-key-101/submit/philippe', parameters)
