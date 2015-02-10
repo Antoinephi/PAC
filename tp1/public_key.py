@@ -70,8 +70,12 @@ def enc(msg, cipher="aes-128-cbc", passphrase=None, base64=True, decrypt=False):
     return stdout.decode(ENCODING)
 
 
-def enc_rsa(msg, pk_file):
-    args = ["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk_file]
+def enc_rsa(msg, pk_file,decrypt=False):
+    args = ["openssl", "pkeyutl", "-pubin", "-inkey", pk_file]
+    if decrypt:
+        args.append('-decrypt')
+    else:
+        args.append('-encrypt')
     result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = result.communicate(msg.encode(ENCODING))
     args = ["base64"]
@@ -79,6 +83,13 @@ def enc_rsa(msg, pk_file):
     stdout = result.communicate(stdout)
     return stdout
 
+def generate_pk():
+    args = ['openssl', 'genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', 'rsa_pk.pub']
+    result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = result.communicate(msg.encode(ENCODING))
+    if stderr == "bad decrypt\n":
+        raise DecryptionError()
+    return stdout.decode(ENCODING)
 
 ############### Script ##################
 
@@ -90,7 +101,18 @@ public_key = server_query(BASE_URL +  '/public-key-101/get-PK')
     f.write(public_key)
     f.close()"""
 
+
 result = enc_rsa("Hi, how are you?", "pk2.pub")
-print(result[0])
-parameters = {'ciphertext', result[0]}
+#encrypton
+parameters = {'ciphertext': 'RqCv4uT10N+K3IS+liPdnHcXPWQEjTVCgNK4fHVoQ0mxP6Bx3asCfL5YyTiy8PlHl/TbnGVH80fm\nK6VnAXoBlzGkCreIERC0ojiFi1tYksS93pYtjY0kULq33yvAYCCAl4eGI/pbgwpZhuCsdByz8KGU\ngvi4j8tX2+DvanUfGnGLsOmyVNlwwlOa44+LVYV5+6V/85AEcRzbgGeVfhpz59AzGFfh80Fe8IB9\n/n14L7gBZQWxNvTc5dOPwE0OhWOfDSWOUEplCOWLOM00+pZzqgFQ1tCF7n+D2OxY9ddjgUwdvoFv\nOL6tOURHD13ZOAZalLZgKLfBM+UaRD5/fvyEYw=='}
 server_query(BASE_URL + '/public-key-101/submit/philippe', parameters)
+
+f = open('rsa_pk.pub', 'r')
+pkey = f.read()
+print(pkey)
+parameters = {'public-key' : '-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwB9RSqzqK6A1m6OE/gvoUlpKV+xKOyifDISBXOUnxPQXvLY6RKV/DY1FjtWm/+ezQv1vi2R588ectqkdmiKyN1cyfnPJycMYsuLNLoKSCpkZP2g1udAXn5ROC0W18/xEKZHBbGZZgsajBy1GUVCXX8j77A6SF7jaEN4mQQp5+ld6PKNVO1Ja+IQXe22j673EHsOMWPfVAOPiCXqWi2HFO7rK84psx4J7SruXR0ylGRraFdBERimf8TdQ6nA7FKE+dvNS/E0vxhAJUuNQEvTSlqiIECfRe0X4k0Nc0NtszQeZb5CRhzfQG+PPQCQvs9S9tinCLVWfPoC8HdD620eD1QIDAQAB-----END PUBLIC KEY-----'}
+response = server_query(BASE_URL + '/public-key-101/query/philippe', parameters)
+print(response)
+
+result = enc_rsa(response, "rsa_pk_.pub", True)
+print("result : \n" , result)
