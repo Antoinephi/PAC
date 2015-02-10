@@ -6,7 +6,6 @@ import json
 import time
 import subprocess
 
-from client import *
 ### adresse du serveur de TP
 BASE_URL = "http://pac.bouillaguet.info/TP1"
 ENCODING = 'utf-8'
@@ -113,7 +112,7 @@ result = enc_rsa("Hi, how are you?", "pk2.pub")
 #Sending Encrypted message
 parameters = {'ciphertext': result[0].decode('utf-8')}
 response = server_query(BASE_URL + '/public-key-101/submit/philippe', parameters)
-print(response)
+# print(response)
 
 #generation public key
 generate_secret_key()
@@ -132,9 +131,9 @@ result = dec_rsa(response, "rsa_sk.pub")
 
 #Sending magic key to server through GET
 response = server_query(BASE_URL + result[0].decode('utf-8'))
-print(response)
+# print(response)
 
-#Hybrid Encryption
+############Hybrid Encryption
 
 #Reading public key from file
 f = open('rsa_pk.pub', 'r')
@@ -142,13 +141,27 @@ pkey = f.read()
 f.close()
 #Sending public key to server
 parameters = {'public-key' : pkey}
-response = server_query(BASE_URL + '  /public-key-101/hybrid/philippe', parameters)
+response = server_query(BASE_URL + '/public-key-101/hybrid/philippe', parameters)
 
 print(response)
 
 result = dec_rsa(response['session-key'], 'rsa_sk.pub')
 
 secret_key = result[0].decode('utf-8')
-print(secret_key)
+# print(secret_key)
 
-result = enc(reponse['cyphertext'], passphrase=secret_key, decrypt=True)
+result = enc(response['ciphertext'], passphrase=secret_key, decrypt=True)
+print(result)
+
+ciphertext = 'philippe, did you know that 4318217343c7aa35452424076bee6c44 ?'
+ciphertext = enc(ciphertext, passphrase=secret_key)
+print("ciphertext : \n", ciphertext)
+secret_key = enc_rsa(secret_key , 'pk2.pub')
+secret_key = secret_key[0].decode('utf-8')
+
+print("secret key :\n",secret_key[:-1])
+
+parameters = {'ciphertext': ciphertext,'session-key':secret_key}
+print(parameters)
+response = server_query(BASE_URL + '/public-key-101/validate', parameters)
+print(response)
