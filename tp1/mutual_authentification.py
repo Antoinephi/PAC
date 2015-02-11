@@ -109,29 +109,3 @@ def sign(msg, sk_file):
     return stdout
 
 ############### Script ##################
-
-# result = server_query(BASE_URL + '/web-of-trust/ecdsa-parameters.pem')
-
-# f = open('ecdsa.pem', 'w')
-# f.write(result)
-# f.close
-# time.sleep(1)
-# generate_ecdsa('ecdsa.pem')
-
-f = open('public_key.pem', 'r')
-pkey = f.read()
-f.close()
-
-# signature = sign('public_key.pem', 'secret_key.pem')
-# print(signature)
-# parameters = {'public-key':pkey, 'auth':'MEUCIFyyoYnX3g5nUGupuQrS2MoposLEVXK4rVn3Vl9GdK8GAiEAjX3gpBBQ67cNVcURn2HNqW9+VmiD5Unfo86RIdepty4='}
-# print("parameters : \n", parameters)
-# result = server_query(BASE_URL + '/web-of-trust/put/philippe', parameters)
-
-# print("result : \n", result)
-
-result = server_query(BASE_URL + '/web-of-trust/get/danglot')
-print(result['public-key'])
-f = open('danglot.pem', 'w')
-f.write(result['public-key'])
-f.close()
