@@ -5,6 +5,9 @@ import urllib.error
 import json
 import time
 import subprocess
+import os
+import binascii
+import ast
 
 ### adresse du serveur de TP
 BASE_URL = "http://pac.bouillaguet.info/TP1"
@@ -99,13 +102,57 @@ def dec_rsa(msg, sk_file):
 
 def sign(msg, sk_file):  
 
-    args = ["openssl", "pkeyutl", "-sign", "-inkey", sk_file, '-in', msg]
+    args = ["openssl", "pkeyutl", "-sign", "-inkey", sk_file]
     result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stdee = result.communicate()
+    stdout, stdee = result.communicate(msg.encode(ENCODING))
     args = ["base64"]
     result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout,stderr = result.communicate(msg.encode(ENCODING))
     stdout, stderr = result.communicate(stdout)
     return stdout
 
 ############### Script ##################
+
+#Initiating protocol
+
+result = server_query(BASE_URL + '/mutual-authentication/setup/machine-friendly')
+random_key = os.urandom(16)
+random_key = binascii.b2a_hex(random_key).decode('utf-8')
+# print(result)
+
+f = open('rsa_pk.pub', 'r')
+rsa_pk = f.read()
+f.close()
+signed_pk = sign(rsa_pk, 'secret_key.pem')
+initiator_public_key = server_query(BASE_URL + '/mutual-authentication/users/' + result['peer'] + '/public-key' )
+
+f = open('initiator_public_key.pem', 'w')
+f.write(initiator_public_key['public-key'])
+f.close()
+# print(initiator_public_key['public-key'])
+
+if result['initiator'] == 'you':
+
+    first_message = {'N_a':random_key, 'login':'philippe'}
+    first_message = enc_rsa(str(first_message), 'initiator_public_key.pem')
+    print(first_message[0].decode('utf-8'))
+
+    # print(signed_pk.decode('utf-8'))
+    parameters = {'public-key':rsa_pk, 'signature':signed_pk.decode('utf-8'), 'A':first_message[0].decode('utf-8')}
+    print(parameters)
+    result = server_query(BASE_URL + '/mutual-authentication/users/' + result['peer'] + '/step-1', parameters)
+    print(result)
+
+else :
+    parameters = {'login':'philippe', 'public-key':rsa_pk, 'signature':signed_pk.decode('utf-8')}
+    result = server_query(BASE_URL + '/mutual-authentication/users/' + result['peer'] + '/step-0', parameters)
+    session_key = dec_rsa(result['A']['session-key'], 'rsa_sk.pub')
+    # print(session_key[0].decode('utf-8'))
+    cipher = enc(result['A']['ciphertext'], passphrase=session_key[0].decode('utf-8'), decrypt=True)
+    cipher = ast.literal_eval(cipher)
+    # print(ast.literal_eval(cipher))
+    second_message = {'N_a':cipher['N_a'], 'N_b':random_key, 'login':cipher['login']}
+    print(second_message)
+    second_message = enc_rsa(str(second_message), 'initiator_public_key.pem')
+    print(second_message)
+    # parameters = {'AB':second_message.decode('utf-8')}
+    # print(parameters)
