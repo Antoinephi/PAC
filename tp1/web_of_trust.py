@@ -136,7 +136,25 @@ def sign(msg, sk_file):
 # f.write(result['public-key'])
 # f.close()
 
-parameters = {'signer':'danglot', 'signature': 'MEYCIQDILUiok+sxQUOJh96pc6Zvmz0i7GOoUFgqHkiUI1Ki+wIhAIW0qSyJRhpcus4K/MUzbemoXZ+17TTUGbKHD2DRVUvz', 'auth':'MEUCIQD+fYqIgNOTh00dxuHPIstpFDFA/97FLA0Zc3/Hah/XYwIgcqFKMByCEz1X7r/aok4WxClHpzlmMLSC6cxU2RBKLyM='}
 
-result = server_query(BASE_URL + '/web-of-trust/sign/philippe', parameters)
-print(result)
+pk_blanquart = server_query(BASE_URL + '/web-of-trust/get/blanquart')
+pk_blanquart = pk_blanquart['public-key']
+
+f = open('signature_blanquart.txt', 'w')
+f.write(pk_blanquart)
+f.close()
+
+
+# f = open('signPhilippePKByBlanquart.txt','r')
+# sign = f.read()
+# f.close()
+
+# f = open('signature_blanquart.pem', 'r')
+# sign_v = f.read()
+# f.close()
+
+
+# parameters = {'signer':'blanquart', 'signature': sign, 'auth':sign_v}
+# print(parameters)
+# result = server_query(BASE_URL + '/web-of-trust/sign/philippe', parameters)
+# print(result)
