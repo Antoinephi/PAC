@@ -118,9 +118,9 @@ def sign(msg, sk_file):
 # time.sleep(1)
 # generate_ecdsa('ecdsa.pem')
 
-f = open('public_key.pem', 'r')
-pkey = f.read()
-f.close()
+# f = open('public_key.pem', 'r')
+# pkey = f.read()
+# f.close()
 
 # signature = sign('public_key.pem', 'secret_key.pem')
 # print(signature)
@@ -130,8 +130,31 @@ f.close()
 
 # print("result : \n", result)
 
-result = server_query(BASE_URL + '/web-of-trust/get/danglot')
-print(result['public-key'])
-f = open('danglot.pem', 'w')
-f.write(result['public-key'])
+# result = server_query(BASE_URL + '/web-of-trust/get/danglot')
+# print(result['public-key'])
+# f = open('danglot.pem', 'w')
+# f.write(result['public-key'])
+# f.close()
+
+
+pk_blanquart = server_query(BASE_URL + '/web-of-trust/get/blanquart')
+pk_blanquart = pk_blanquart['public-key']
+
+f = open('signature_blanquart.txt', 'w')
+f.write(pk_blanquart)
 f.close()
+
+
+# f = open('signPhilippePKByBlanquart.txt','r')
+# sign = f.read()
+# f.close()
+
+# f = open('signature_blanquart.pem', 'r')
+# sign_v = f.read()
+# f.close()
+
+
+# parameters = {'signer':'blanquart', 'signature': sign, 'auth':sign_v}
+# print(parameters)
+# result = server_query(BASE_URL + '/web-of-trust/sign/philippe', parameters)
+# print(result)
