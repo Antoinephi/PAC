@@ -105,7 +105,29 @@ class MersenneTwister:
         y ^= y >> 18
         return y
 
+    def _IntToBit(x):
+        x = "{0:b}".format(x)
+        return x
 
+    def _g(y):
+        print("y :\n" + "{0:b}".format(y))
+        y ^= y >> 11
+        print("y ^= y >> 11 :\n" + "{0:b}".format(y))
+        y ^= (y << 7) & 2636928640
+        print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
+        y ^= (y << 15) & 4022730752
+        print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
+        y ^= y >> 18
+        print("y ^= y >> 18 :\n"+"{0:b}".format(y))
+        return y
 
-for i in range(9999999999):
-    print(i , "\n")
+    def f_(y):
+        print("y :\n" + "{0:b}".format(y))
+        x = y >> 18
+        y = y ^ x
+        print("y ^= y >> 18 :\n"+"{0:b}".format(y))
+        y ^= ~(y << 15) | ~4022730752
+        print("y = ~(y << 15) | ~4022730752 :\n"+"{0:b}".format(y))
+
+    y = _g(127)
+    f_(y)
