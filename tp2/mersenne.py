@@ -126,8 +126,29 @@ class MersenneTwister:
         x = y >> 18
         y = y ^ x
         print("y ^= y >> 18 :\n"+"{0:b}".format(y))
-        y ^= ~(y << 15) | ~4022730752
-        print("y = ~(y << 15) | ~4022730752 :\n"+"{0:b}".format(y))
+        x = y << 15
+        x = y & 4022730752
+        # y ^= ~(x << 15) | ~(4022730752)
+        y = x ^ y
+        print("y = y << 15 & 4022730752 :\n"+"{0:b}".format(y))
+        x = y << 7
+        x = y & 2636928640
+        y = x ^ y
+        print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
+        x = y >> 11
+        y = x ^ y
+        print("y ^= y >> 11 :\n" + "{0:b}".format(y))
+        print(y)
 
-    y = _g(127)
+    y = _g(128)
     f_(y)
+    y = _g(256)
+    f_(y)
+    y = _g(1024)
+    f_(y)
+    # y = _g(128)
+    # f_(y)
+    # y = _g(128)
+    # f_(y)
+    # y = _g(128)
+    # f_(y)
