@@ -105,10 +105,6 @@ class MersenneTwister:
         y ^= y >> 18
         return y
 
-    def _IntToBit(x):
-        x = "{0:b}".format(x)
-        return x
-
     def _g(y):
         print("y :\n" + "{0:b}".format(y))
         y ^= y >> 11
@@ -140,15 +136,28 @@ class MersenneTwister:
         print("y ^= y >> 11 :\n" + "{0:b}".format(y))
         print(y)
 
-    y = _g(128)
-    f_(y)
-    y = _g(256)
-    f_(y)
-    y = _g(1024)
-    f_(y)
-    # y = _g(128)
-    # f_(y)
-    # y = _g(128)
-    # f_(y)
-    # y = _g(128)
-    # f_(y)
+def reverse_test(x):
+    print("x : " + "{0:b}".format(x) + "\n")
+    y = x ^ (x >> 3)
+    print("y : " +"{0:b}".format(y) + "\n")
+    cpt = 0
+    for i in "{0:b}".format(y):            
+        if cpt == 0:
+            a = i
+            print("i : ",i, "a ",a)
+        elif cpt == 1:
+            b = i
+            print("i : ",i, "b ", b)
+        elif cpt == 2:
+            c = int(i) ^ int(a)
+            # print("c = i ^ a : " , c , " = " , i , " ^ " , a)
+            print("i : ",i, "c ",c)
+        elif cpt == 3:
+            d = int(i) ^ int(b)
+            print("i : ",i, "d ", d)
+        elif cpt == 4:
+            e = int(i) ^ int(c)
+            print("i : ",i, "e ", e) 
+        cpt = cpt+1
+
+reverse_test(17)
