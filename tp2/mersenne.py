@@ -136,28 +136,36 @@ class MersenneTwister:
         print("y ^= y >> 11 :\n" + "{0:b}".format(y))
         print(y)
 
-def reverse_test(x):
+def reverse_test(x, decallage):
     print("x : " + "{0:b}".format(x) + "\n")
-    y = x ^ (x >> 3)
+    y = x ^ (x >> decallage)
     print("y : " +"{0:b}".format(y) + "\n")
     cpt = 0
-    for i in "{0:b}".format(y):            
-        if cpt == 0:
-            a = i
-            print("i : ",i, "a ",a)
-        elif cpt == 1:
-            b = i
-            print("i : ",i, "b ", b)
-        elif cpt == 2:
-            c = int(i) ^ int(a)
-            # print("c = i ^ a : " , c , " = " , i , " ^ " , a)
-            print("i : ",i, "c ",c)
-        elif cpt == 3:
-            d = int(i) ^ int(b)
-            print("i : ",i, "d ", d)
-        elif cpt == 4:
-            e = int(i) ^ int(c)
-            print("i : ",i, "e ", e) 
+    tab = []
+    for i in "{0:b}".format(y):
+        print(int(i), " % ",  (len("{0:b}".format(y)) - decallage),  " : ", int(i)%(len("{0:b}".format(y)) - decallage))            
+        if cpt < decallage :
+            tab.append(i)
+        else :
+            val = int(tab[int(i)%decallage]) ^ int(i)
+            tab.append(val)
+        # if cpt == 0:
+        #     a = i
+        #     print("i : ",i, "a ",a)
+        # elif cpt == 1:
+        #     b = i
+        #     print("i : ",i, "b ", b)
+        # elif cpt == 2:
+        #     c = int(a) ^ int(i)
+        #    #print("c = i ^ a : " , c , " = " , i , " ^ " , a)
+        #     print("i : ",i, "c ",c)
+        # elif cpt == 3:
+        #     d = int(b) ^ int(i)
+        #     print("i : ",i, "d ", d)
+        # elif cpt == 4:
+        #     e = int(c) ^ int(i)
+        #     print("i : ",i, "e ", e) 
         cpt = cpt+1
+    print(tab)
 
-reverse_test(17)
+reverse_test(16, 2)
