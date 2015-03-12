@@ -107,14 +107,18 @@ class MersenneTwister:
 
 def _g(y):
     print("y :\n" + "{0:b}".format(y))
-    y ^= y >> 11
-    print("y ^= y >> 11 :\n" + "{0:b}".format(y))
-    y ^= (y << 7) #& 2636928640
+    # print("y >> 11 :\n{0:b}".format(y >> 11))
+    # y ^= y >> 11
+    # print("y ^= y >> 11 :\n" + "{0:b}".format(y))
+    print("y << 7 :\n{0:b}".format(y << 7))
+    print("2636928640 :\n{0:b}".format(2636928640))
+    print("(y << 7) & 2636928640 :\n{0:b}".format((y << 7) & 2636928640))    
+    y ^= (y << 7) & 2636928640
     print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
-    y ^= (y << 15) #& 4022730752
-    print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
-    y ^= y >> 18
-    print("y ^= y >> 18 :\n"+"{0:b}".format(y))
+    # y ^= (y << 15) & 4022730752
+    # print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
+    # y ^= y >> 18
+    # print("y ^= y >> 18 :\n"+"{0:b}".format(y))
     return y
 
 def f_(y, decallage, shift):
@@ -157,13 +161,21 @@ def reverse_test(x, decallage, shift='r'):
     return res
 
 # # reverse_test(16, 2)
-# y = _g(123456789)
-# print("---------------")
-# print("{0:b}".format(y))
+y = _g(5263)
+print("---------------")
+print("{0:b}".format(y))
+# print(int("{0:b}".format(y)[7:], 2))
+
+# "{0:b}".format(y)[:7]
+
 # y = f_(y, 18, 'r') 
 # y = f_(y, 15, 'l') 
 # y = f_(y, 7, 'l') 
+# y = int("{0:b}".format(y)[15:], 2)
+# print("{0:b}".format(y))
+# y = int("{0:b}".format(y)[7:], 2)
+# print("{0:b}".format(y))
 # y = f_(y, 11, 'r')
-# print(y)
+print(y)
 
-print("{0:b}".format((7 << 2) & 0b1100))
+# print("{0:b}".format((7 << 2) & 0b1100))
