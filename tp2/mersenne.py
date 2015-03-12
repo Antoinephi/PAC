@@ -109,15 +109,15 @@ def _g(y):
     print("y :\n" + "{0:b}".format(y))
     y ^= y >> 11
     print("y ^= y >> 11 :\n" + "{0:b}".format(y))
-    y ^= (y << 7) #& 2636928640
+    y ^= (y << 7) & 2636928640
     print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
-    y ^= (y << 15) #& 4022730752
+    y ^= (y << 15) & 4022730752
     print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
     y ^= y >> 18
     print("y ^= y >> 18 :\n"+"{0:b}".format(y))
     return y
 
-def f_(y, decallage, shift):
+def f_(y, decallage, shift, masque=None):
     cpt = 0
     tab = []
     for i in "{0:b}".format(y):            
@@ -128,8 +128,10 @@ def f_(y, decallage, shift):
             tab.append(str(val))
         cpt = cpt+1
     res = int("".join(tab), 2)
+
     if shift == 'l' and len("{0:b}".format(res)) > decallage :
         res = (res >> decallage)
+
     print("{0:b}".format(res))
     return res
 
@@ -157,13 +159,13 @@ def reverse_test(x, decallage, shift='r'):
     return res
 
 # # reverse_test(16, 2)
-# y = _g(123456789)
-# print("---------------")
-# print("{0:b}".format(y))
-# y = f_(y, 18, 'r') 
-# y = f_(y, 15, 'l') 
-# y = f_(y, 7, 'l') 
-# y = f_(y, 11, 'r')
-# print(y)
+y = _g(123456789)
+print("---------------")
+print("{0:b}".format(y))
+y = f_(y, 18, 'r') 
+y = f_(y, 15, 'l', 4022730752) 
+y = f_(y, 7, 'l', 2636928640) 
+y = f_(y, 11, 'r')
+print(y)
 
-print("{0:b}".format((7 << 2) & 0b1100))
+# print("{0:b}".format((7 << 2) & 0b1100))
