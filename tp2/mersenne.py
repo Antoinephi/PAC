@@ -105,67 +105,65 @@ class MersenneTwister:
         y ^= y >> 18
         return y
 
-    def _g(y):
-        print("y :\n" + "{0:b}".format(y))
-        y ^= y >> 11
-        print("y ^= y >> 11 :\n" + "{0:b}".format(y))
-        y ^= (y << 7) & 2636928640
-        print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
-        y ^= (y << 15) & 4022730752
-        print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
-        y ^= y >> 18
-        print("y ^= y >> 18 :\n"+"{0:b}".format(y))
-        return y
+def _g(y):
+    print("y :\n" + "{0:b}".format(y))
+    y ^= y >> 11
+    print("y ^= y >> 11 :\n" + "{0:b}".format(y))
+    y ^= (y << 7) #& 2636928640
+    print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
+    y ^= (y << 15) #& 4022730752
+    print("y ^= (y << 15) & 4022730752:\n" + "{0:b}".format(y))
+    y ^= y >> 18
+    print("y ^= y >> 18 :\n"+"{0:b}".format(y))
+    return y
 
-    def f_(y):
-        print("y :\n" + "{0:b}".format(y))
-        x = y >> 18
-        y = y ^ x
-        print("y ^= y >> 18 :\n"+"{0:b}".format(y))
-        x = y << 15
-        x = y & 4022730752
-        # y ^= ~(x << 15) | ~(4022730752)
-        y = x ^ y
-        print("y = y << 15 & 4022730752 :\n"+"{0:b}".format(y))
-        x = y << 7
-        x = y & 2636928640
-        y = x ^ y
-        print("y ^= (y << 7) & 2636928640 :\n" + "{0:b}".format(y))
-        x = y >> 11
-        y = x ^ y
-        print("y ^= y >> 11 :\n" + "{0:b}".format(y))
-        print(y)
-
-def reverse_test(x, decallage):
-    print("x : " + "{0:b}".format(x) + "\n")
-    y = x ^ (x >> decallage)
-    print("y : " +"{0:b}".format(y) + "\n")
+def f_(y, decallage, shift):
     cpt = 0
     tab = []
-    for i in "{0:b}".format(y):
-        print(int(i), " % ",  (len("{0:b}".format(y)) - decallage),  " : ", int(i)%(len("{0:b}".format(y)) - decallage))            
+    for i in "{0:b}".format(y):            
         if cpt < decallage :
             tab.append(i)
         else :
-            val = int(tab[int(i)%decallage]) ^ int(i)
-            tab.append(val)
-        # if cpt == 0:
-        #     a = i
-        #     print("i : ",i, "a ",a)
-        # elif cpt == 1:
-        #     b = i
-        #     print("i : ",i, "b ", b)
-        # elif cpt == 2:
-        #     c = int(a) ^ int(i)
-        #    #print("c = i ^ a : " , c , " = " , i , " ^ " , a)
-        #     print("i : ",i, "c ",c)
-        # elif cpt == 3:
-        #     d = int(b) ^ int(i)
-        #     print("i : ",i, "d ", d)
-        # elif cpt == 4:
-        #     e = int(c) ^ int(i)
-        #     print("i : ",i, "e ", e) 
+            val = int(tab[cpt-decallage]) ^ int(i)
+            tab.append(str(val))
         cpt = cpt+1
-    print(tab)
+    res = int("".join(tab), 2)
+    if shift == 'l' and len("{0:b}".format(res)) > decallage :
+        res = (res >> decallage)
+    print("{0:b}".format(res))
+    return res
 
-reverse_test(16, 2)
+def reverse_test(x, decallage, shift='r'):
+    print("x : " + "{0:b}".format(x) + "\n")
+    if shift == 'r' :
+        y = x ^ (x >> decallage)
+    else :
+        y = x ^ (x << decallage)
+
+    print("y : " +"{0:b}".format(y) + "\n")
+    cpt = 0
+    tab = []
+    for i in "{0:b}".format(y):            
+        if cpt < decallage :
+            tab.append(i)
+        else :
+            val = int(tab[cpt-decallage]) ^ int(i)
+            tab.append(str(val))
+        cpt = cpt+1
+    res = int("".join(tab), 2)
+    if shift == 'l' and len("{0:b}".format(res)) > decallage :
+        res = (res >> decallage)
+    print("{0:b}".format(res))
+    return res
+
+# # reverse_test(16, 2)
+# y = _g(123456789)
+# print("---------------")
+# print("{0:b}".format(y))
+# y = f_(y, 18, 'r') 
+# y = f_(y, 15, 'l') 
+# y = f_(y, 7, 'l') 
+# y = f_(y, 11, 'r')
+# print(y)
+
+print("{0:b}".format((7 << 2) & 0b1100))
