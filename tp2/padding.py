@@ -24,7 +24,7 @@ b = Block.random(16)
 m = Message()
 m.append(b.hex())
 m.append(msg[384:])
-blocks = b.hex()
+blocks = b.hex() + msg[384:]
 parameters = {'ciphertext':blocks, 'IV':iv}
 print(parameters)
 try :
