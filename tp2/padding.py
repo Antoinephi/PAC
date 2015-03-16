@@ -51,10 +51,10 @@ while result['status'] == 'invalid padding' :
 X_pad = xor(msg[len(msg)-1:].encode(), str(b)[len(str(b))-1:].encode())
 # print(base64.b16encode(X_pad).decode)
 # X_pad = base64.b16encode(X_pad).decode()
-y = xor(X_pad, "01".encode())
+y = xor(str(b)[len(str(b))-1:].encode(), "01".encode())
 y = base64.b16encode(y).decode()
 print(y)
 parameters = {"value":y}
 print(parameters)
-result = server.query("/last-byte/philippe/" + sys.argv[1], parameters)
-print(result)
+# result = server.query("/last-byte/philippe/" + sys.argv[1], parameters)
+# print(result)
