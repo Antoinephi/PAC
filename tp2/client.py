@@ -52,8 +52,8 @@ class Server:
              raise ServerError(e.code, e.read().decode()) from None
 
 
-server = Server("http://pac.bouillaguet.info/TP2/")
-parameters = {"card-type":"Visa", "number":"5136-5827-9281-0183", "expiration-date":"01/2014", "card-verification-number":"666"}
+# server = Server("http://pac.bouillaguet.info/TP2/")
+# parameters = {"card-type":"Visa", "number":"5136-5827-9281-0183", "expiration-date":"01/2014", "card-verification-number":"666"}
 
-result = server.query("bribe/philippe", parameters)
-print(result)
+# result = server.query("bribe/philippe", parameters)
+# print(result)
