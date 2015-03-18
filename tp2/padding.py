@@ -43,9 +43,13 @@ while last_byte['status'] != 'OK':
 
 
 	y = xor(str(b)[len(str(b))-1:].encode(), "01".encode())
+	print(base64.b16encode(y).decode())
+	print("msg : \n", msg[last_block_len-len(str(b)):last_block_len])
+	x = xor(y, msg[last_block_len-len(str(b)):last_block_len].encode())
+	x = base64.b16encode(x).decode()
 	y = base64.b16encode(y).decode()
-	parameters = {"value":y}
-	# print(parameters)
+	parameters = {"value":x}
+	print(parameters)
 	try :
 		last_byte = server.query("/last-byte/philippe/" + seed, parameters)
 		print("last_byte : " ,last_byte)
@@ -91,4 +95,4 @@ def calcul_octet(octet, seed, y):
 			print("fail")
 
 
-calcul_octet(2, seed)
+# calcul_octet(2, seed)
