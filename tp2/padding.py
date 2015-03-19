@@ -10,7 +10,7 @@ def xor(a, b):
        c.append(x ^ y)
    return c
 
-def last_byte(b, num_bloc, seed):
+def last_byte(challenge, b, num_bloc, seed):
 	last_byte_res = {'status':""}
 	# val = "00000000000000{0:02x}".format(num_bloc)
 
@@ -18,11 +18,17 @@ def last_byte(b, num_bloc, seed):
 	# b.__ixor__(Block(val.encode()))
 	# """ a surveiller, potentiel bug """
 
-	y = xor(str(b)[len(str(b))-1:].encode(), "01".encode())
-	y = base64.b16encode(y).decode()
-	parameters = {"value":y}
+
+	iv = challenge['IV']
+	msg = Message(challenge['ciphertext'])
+	# D(K, Y[n]) = r ^ 01
+	y = xor(str(b)[-1].encode(), "01".encode())
+	#X[n] = D(K, Y[n]) ^ Y[n-1]
+	x = xor(y, str(msg[len(msg)-1])[-1].encode())
+	x = base64.b16encode(x).decode()
+	parameters = {"value":x}
 	print(parameters)
-	# print("/last-byte/philippe/" + seed + "/" + str(num_bloc))
+	print("/last-byte/philippe/" + seed + "/" + str(num_bloc))
 	try :
 		last_byte_res = server.query("/last-byte/philippe/" + seed + "/" +str(num_bloc), parameters)
 		print("last_byte : " ,last_byte_res)
@@ -35,9 +41,10 @@ def last_byte(b, num_bloc, seed):
 def oracle(challenge, num_bloc, dechiffre=None):
 	iv = challenge['IV']
 	msg = challenge['ciphertext']
-	# print(msg)
-
+	print(msg)
 	msg = Message(challenge['ciphertext'])
+	print(len(msg)-1)
+	print(msg[len(msg)-1])
 	result = {'status':""}
 	while result['status'] != 'OK' :
 		b = Block.random(16)
@@ -69,7 +76,7 @@ while last_byte_res['status'] != 'OK':
 	result = server.query('/challenge/philippe/' + seed)
 
 	b = oracle(result, 1)
-	last_byte_res = last_byte(b, 1, seed)
+	last_byte_res = last_byte(result, b, 1, seed)
 
 	# # print(result)
 	# iv = result['IV']
