@@ -22,9 +22,10 @@ def last_byte(b, num_bloc, seed):
 	y = base64.b16encode(y).decode()
 	parameters = {"value":y}
 	print(parameters)
+	# print("/last-byte/philippe/" + seed + "/" + str(num_bloc))
 	try :
-		last_byte = server.query("/last-byte/philippe/" + seed + "/" +num_bloc, parameters)
-		print("last_byte : " ,last_byte)
+		last_byte_res = server.query("/last-byte/philippe/" + seed + "/" +str(num_bloc), parameters)
+		print("last_byte : " ,last_byte_res)
 	except:
 		print("fail")
 
@@ -68,7 +69,7 @@ while last_byte_res['status'] != 'OK':
 	result = server.query('/challenge/philippe/' + seed)
 
 	b = oracle(result, 1)
-	last_byte(b, 1, seed)
+	last_byte_res = last_byte(b, 1, seed)
 
 	# # print(result)
 	# iv = result['IV']
