@@ -4,13 +4,7 @@ import base64
 import sys
 
 
-def xor(a, b):
-   c = bytearray()
-   for x,y in zip(a,b):
-       c.append(x ^ y)
-   return c
-
-def last_byte(challenge, b, num_bloc, seed):
+def last_byte(challenge, b, num_bloc, seed, nb_bloc):
 	last_byte_res = {'status':""}
 	# val = "00000000000000{0:02x}".format(num_bloc)
 
@@ -18,145 +12,93 @@ def last_byte(challenge, b, num_bloc, seed):
 	# b.__ixor__(Block(val.encode()))
 	# """ a surveiller, potentiel bug """
 
-
 	iv = challenge['IV']
 	msg = Message(challenge['ciphertext'])
+	# print(msg[-2])
 	# D(K, Y[n]) = r ^ 01
-	y = xor(str(b)[-1].encode(), "01".encode())
+	tmp = Block()
+	for i in range(1, num_bloc+1) :
+		tmp[-i] = num_bloc
+	# print(tmp)
+	d_y_n = b.__xor__(tmp)
 	#X[n] = D(K, Y[n]) ^ Y[n-1]
-	x = xor(y, str(msg[len(msg)-1])[-1].encode())
-	x = base64.b16encode(x).decode()
-	parameters = {"value":x}
+	x_n = msg[-nb_bloc-1].__xor__(d_y_n)
+	# print(-nb_bloc-1)
+	if num_bloc > 1 and nb_bloc == 1:
+		x_n = x_n.hex()[-2*num_bloc:(-2*num_bloc)+2]
+	else :
+		x_n = x_n.hex()[-2:]
+	parameters = {"value":x_n}
 	print(parameters)
-	print("/last-byte/philippe/" + seed + "/" + str(num_bloc))
-	try :
-		last_byte_res = server.query("/last-byte/philippe/" + seed + "/" +str(num_bloc), parameters)
-		print("last_byte : " ,last_byte_res)
-	except:
-		print("fail")
+	print("num_bloc : ", num_bloc)
+	# print("/last-byte/philippe/" + seed + "/" + str(num_bloc))
+	# try :
+	# last_byte_res = server.query("/last-byte/philippe/" + seed + "/" +str(num_bloc), parameters)
+	# print("last_byte : " ,last_byte_res)
+	# except:
+		# print("fail")
 
-	return last_byte_res
+	return d_y_n, x_n
 
 
-def oracle(challenge, num_bloc, dechiffre=None):
+def oracle(challenge, num_bloc, nb_bloc, dechiffre=None):
 	iv = challenge['IV']
 	msg = challenge['ciphertext']
-	print(msg)
-	msg = Message(challenge['ciphertext'])
-	print(len(msg)-1)
-	print(msg[len(msg)-1])
+	msg = Message(msg)
+	# print(msg)
+	# print(msg[-2:-1])
 	result = {'status':""}
 	while result['status'] != 'OK' :
 		b = Block.random(16)
-		if num_bloc > 1 :
-			val = "00000000000000{0:02x}".format(num_bloc)
-
+		if num_bloc > 1 and nb_bloc == 1:
+			val = Block()
+			# print("val 0 ", val)
+			for i in range(1, num_bloc):
+				val[-i] = num_bloc
+			# print("val 02 ", val)
 			""" a surveiller, potentiel bug """
-			b.__ixor__(Block(val.encode()))
+			val.__ixor__(dechiffre)
 			""" a surveiller, potentiel bug """
-
-			blocks = b.hex() + msg[len(msg)-1].hex()
-		else :
-			blocks = b.hex() + msg[len(msg)-1].hex()
+			# print("dechiffre : ", dechiffre)
+			# print("val xor ", val)
+			for i in range(1, num_bloc):
+				b[-i] = val[-i]
+		blocks = b.hex() + msg[-nb_bloc].hex()
+		# print(b)
 		parameters = {'ciphertext':blocks, 'IV':iv}
 		# print(parameters)
 		result = server.query('/oracle/philippe', parameters)
 		# print(result)
 	return b	
-
 server = Server('http://pac.bouillaguet.info/TP2/padding-attack')
 
 seed = sys.argv[1]
-last_byte_res = {}
-last_byte_res['status'] = ""
-while last_byte_res['status'] != 'OK':
-	seed = int(seed) +1
-	seed = str(seed)
-	print("Seed : " , seed)
-	result = server.query('/challenge/philippe/' + seed)
+j = 0
+result = server.query('/challenge/philippe/' + seed)
+f = open('blocs_dechiffre_' + str(seed), 'a')
+f.write('nb_bloc : '+ str(j) + " " +  "toto" + '\n')
 
-	b = oracle(result, 1)
-	last_byte_res = last_byte(result, b, 1, seed)
+# b = oracle(result, 1, 1)
+# d_y_n, x_n = last_byte(result, b, 1, seed, 1)
+# bloc.append(x_n)
+d_y_n = ""
+for j in range(1, 3):
+	bloc = []
+	b = oracle(result, 1, j, d_y_n)
+	d_y_n, x_n = last_byte(result, b, 1, seed, j)
+	bloc.append(x_n)
+	for i in range(2, 17):
+		
+		b = oracle(result, i, j,d_y_n)
+		d_y_n, x_n = last_byte(result, b, i, seed, j)
+		bloc.append(x_n)
 
-	# # print(result)
-	# iv = result['IV']
-	# msg = result['ciphertext']
-	# # print(msg[len(msg)-2:])
-	# # print(msg)
+	bloc.reverse()
+	bloc = ''.join(bloc)
+	f.write('nb_bloc : '+ str(j) + " " +  bloc + '\n')
+	print("final result : ", bloc)
+# parameters = {"value":bloc}
+# result = server.query("/last-block/philippe/" + str(seed), parameters)
+# print(result)
 
-	# result['status'] = ""
-	# while result['status'] != 'OK' :
-	# 	b = Block.random(16)
-	# 	last_block_len = len(msg) - len(str(b))
-	# 	blocks = b.hex() + msg[last_block_len:]
-	# 	parameters = {'ciphertext':blocks, 'IV':iv}
-	# 	# print(parameters)
-	# 	try :
-	# 		result = server.query('/oracle/philippe', parameters)
-	# 		# print(result)
-	# 	except :
-	# 		print("fail")	
-
-
-	# y = xor(str(b)[len(str(b))-1:].encode(), "01".encode())
-	# y = base64.b16encode(y).decode()
-	# parameters = {"value":y}
-	# print(parameters)
-	# try :
-	# 	last_byte = server.query("/last-byte/philippe/" + seed, parameters)
-	# 	print("last_byte : " ,last_byte)
-	# 	dernier_octet = xor(str(b)[len(str(b))-1:].encode(), msg[last_block_len-len(str(b)):last_block_len].encode()) 
-	# 	dernier_octet = base64.b16encode(dernier_octet).decode()
-	# 	parameters = {"value":y}
-	# 	print(parameters)
-	# 	# try :
-	# 	last_byte = server.query("/last-byte/philippe/" + seed + "/1", parameters)
-	# 	print("last_byte : " ,last_byte)			
-	# 	# except:
-	# 		# print("fail-2")
-	# except:
-	# 	print("fail")
-
-
-
-
-# result['status'] = ""
-# while result['status'] != 'OK' :	
-# 	b = Block.random(16)
-# 	r = xor(0x02.encode(), y.encode())
-# 	r = base64.b16encode(r).decode()
-# 	b = str(b)
-# 	b[len(b)-1] = r
-# 	blocks = b.hex() + msg[last_block_len:]
-# 	parameters = {'ciphertext':blocks, 'IV':iv}
-# 	print(parameters)
-# 	try :
-# 		result = server.query('/oracle/philippe', parameters)
-# 		print(result)
-# 	except :
-# 		print("fail")
-
-
-def calcul_octet(octet, seed):
-	result = server.query('/challenge/philippe/' + seed)
-	iv = result['IV']
-	msg = result['ciphertext']
-	result = {'status': ''}
-	while result['status'] != 'OK' :	
-		b = Block.random(16)
-		r_lb = "{0:02x}".format(octet)
-		r = xor(r_lb.encode(), y.encode())
-		r = base64.b16encode(r).decode()
-		b = str(b)
-		b[len(b)-1] = r
-		blocks = b.hex() + msg[last_block_len:]
-		parameters = {'ciphertext':blocks, 'IV':iv}
-		print(parameters)
-		try :
-			result = server.query('/oracle/philippe', parameters)
-			print(result)
-		except :
-			print("fail")
-
-
-# calcul_octet(2, seed)
+f.close()

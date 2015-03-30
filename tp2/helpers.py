@@ -181,6 +181,8 @@ class Message(list):
             return
         if isinstance(msg, str):
             super().__init__()
-            for i in range(0, len(msg), 16):
-                self.append(Block(msg[i:i+16].encode()))
+            for i in range(0, len(msg), 32):
+                self.append(Block(msg[i:i+32]))
+        if self == []:
+            raise TypeError
 
