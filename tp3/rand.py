@@ -34,13 +34,13 @@ print(iv)
 # next = 2^16*U + L,
 u = (iv[0]*pow(2,16))
 print(u)
-u = u % pow(2,15)
-print(u)
+# u = u % pow(2,15)
+# print(u)
 res = ''
 for i in range(pow(2,16)):
 	if iv[1] == u + i:
 		res =  i
-
+print(res)
 if res == '':
 	for i in range(pow(2,16)):
 		if iv[1] == u + pow(2,16) +i:

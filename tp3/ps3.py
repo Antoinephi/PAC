@@ -21,14 +21,17 @@ result = server.query('/PK/philippe')
 p = result['p']
 g = result['g']
 h = result['h']
-print(result)
+q = p -1
+# print(result)
+m0 = 23
+m1 = 100
 
-parameters = {'m':42}
+parameters = {'m' : m0}
 
 result_0 = server.query('/sign/philippe', parameters)
 
 
-parameters['m'] = 23
+parameters['m'] = m1
 
 result_1 = server.query('/sign/philippe', parameters)
 
@@ -37,21 +40,24 @@ result_1 = server.query('/sign/philippe', parameters)
 # x = r^-1(m - k * s) mod q
 # k = (m0 - m1)(s0 - s1)^-1 mod q
 
-k = (23 - 42)
-s = result_0['signature'][1] - result_1['signature'][1]
-# print(s)
-s_1 = XGCD(s,p)
-# print(s_1)
-k = (k * s_1[1]) %p
-# print(k)
+s0  = result_0['signature'][1]
+s1 = result_1['signature'][1]
+r = result_0['signature'][0]
+s = s0 - s1
 
-r_1 = XGCD(result_0['signature'][0],p)[1]
+s_1 = XGCD(q, s)
 
-x = r_1 * (23 - k*result_0['signature'][1]) % p
+k = ((m0 - m1) * s_1[2]) %q
+
+
+r_1 = XGCD(r,q)[1]
+
+# x = r^-1(m - k * s) mod q
+x = r_1 * (m0 - k*s0) % q
 # print(x)
 
-print(result_0['signature'][0]%p)
-print(pow(g, k, p))
+# print(result_0['signature'][0]%p)
+# print(pow(g, k, p))
 
 parameters = {'x':x}
 result = server.query('/validate/philippe', parameters)
