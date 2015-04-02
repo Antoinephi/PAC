@@ -23,6 +23,12 @@ def srand(seed):
 	global next
 	next = seed
 
+def getNext(next):
+	a = 
+	return 
+
+
+
 server = Server("http://pac.bouillaguet.info/TP3/rand/")
 
 result = server.query("/challenge/philippe")
