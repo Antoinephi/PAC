@@ -16,16 +16,19 @@ def XGCD(a, b):
 
 def rand():
 	global next
-	next = next * 1103515245 + 12345
-	return (next/65536) % 32768
+	next = (next * 1103515245 + 12345)% 2**32
+	return int((next/65536) % 32768)
 
 def srand(seed):
 	global next
 	next = seed
 
-def getNext(next):
-	a = 
-	return 
+def getNext(val):
+	a = 1103515245
+	b = 12345
+	a_1 = XGCD(a, 2**32)
+	print(val)
+	return int(((val-b)*a_1[1])) % 2**32
 
 
 
@@ -38,20 +41,23 @@ print(iv)
 # rand() = (next / 2^16) mod 2^15
 
 # next = 2^16*U + L,
-u = (iv[0]*pow(2,16))
-print(u)
-# u = u % pow(2,15)
-# print(u)
-res = ''
-for i in range(pow(2,16)):
-	if iv[1] == u + i:
-		res =  i
-print(res)
-if res == '':
-	for i in range(pow(2,16)):
-		if iv[1] == u + pow(2,16) +i:
-			res = i
+u = (iv[0] << 16)
 
-print(res)
+res = ''
+for i in range(0,2**16):
+	val = getNext(u + i)
+	srand(val)
+	rand()
+	res = rand()
+if res == '':
+	for i in range(0,2**16):
+		u = 2**15 | u
+		val = getNext(u + i)
+		# val = getNext(u + 2**16 +  i)
+		srand(val)
+		rand()
+		res = rand()
+
+print("res : " ,res)
 
 
