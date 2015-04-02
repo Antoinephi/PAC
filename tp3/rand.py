@@ -27,7 +27,6 @@ def getNext(val):
 	a = 1103515245
 	b = 12345
 	a_1 = XGCD(a, 2**32)
-	print(val)
 	return int(((val-b)*a_1[1])) % 2**32
 
 
@@ -44,20 +43,49 @@ print(iv)
 u = (iv[0] << 16)
 
 res = ''
+ok = {}
+cpt = 0
 for i in range(0,2**16):
 	val = getNext(u + i)
 	srand(val)
 	rand()
 	res = rand()
-if res == '':
-	for i in range(0,2**16):
-		u = 2**15 | u
-		val = getNext(u + i)
-		# val = getNext(u + 2**16 +  i)
-		srand(val)
-		rand()
-		res = rand()
+	if res == iv[1] :
+		ok[cpt] = val
+		cpt+=1
+		print(res)
+# if res != iv[1]:
+# 	cpt = 0
+# 	ok = {}
+# 	for i in range(0,2**16):
+# 		# u = 2**15 | u
+# 		val = getNext(u + 2**16 + i)
+# 		# val = getNext(u + 2**16 +  i)
+# 		srand(val)
+# 		rand()
+# 		res = rand()
+# 		if res == iv[1] :
+# 			ok[cpt] = val
+# 			cpt+=1
+# 			break
+val = ok[1]
+for i in range(0,4):
+	val = getNext(val)
 
-print("res : " ,res)
+srand(val)
+
+for i in range(0,6):
+	print(rand())
 
 
+for i in range(0,4):
+	srand(val)
+
+
+	key = [rand(), rand(), rand(), rand()]
+	parameters = {'key':key}
+
+
+	print(parameters)
+result = server.query('validation/philippe', parameters)
+print(result)
