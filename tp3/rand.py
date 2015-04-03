@@ -29,63 +29,58 @@ def getNext(val):
 	a_1 = XGCD(a, 2**32)
 	return int(((val-b)*a_1[1])) % 2**32
 
+def loop(u, iv):
+	res = {}
+	cursor = 0
+	u = u << 16
+	u_16 = u + 2**16
+	for i in range(0, 2**16):
+		val = getNext(u+i)
+		val_16 = getNext(u_16+i)
+		srand(val)
+		rand()
+		r = rand()
+		if r == iv:
+			res[cursor] = val
+			cursor+=1
+			continue
+		val_16 = getNext(u_16+i)
+		srand(val_16)
+		rand()
+		r_16 = rand()
+		if r_16 == iv:
+			res[cursor] = val_16
+			cursor+=1
+	return res
 
 
 server = Server("http://pac.bouillaguet.info/TP3/rand/")
 
 result = server.query("/challenge/philippe")
 iv = result['IV']
-print(iv)
 
-# rand() = (next / 2^16) mod 2^15
+val = loop(iv[0], iv[1])
 
-# next = 2^16*U + L,
-u = (iv[0] << 16)
+result['status'] = ''
+cursor = 0
+while result['status'] != 'OK' and cursor < 4:
+	for i in range(0,4):
+		val[cursor] = getNext(val[cursor])
 
-res = ''
-ok = {}
-cpt = 0
-for i in range(0,2**16):
-	val = getNext(u + i)
-	srand(val)
-	rand()
-	res = rand()
-	if res == iv[1] :
-		ok[cpt] = val
-		cpt+=1
-		print(res)
-# if res != iv[1]:
-# 	cpt = 0
-# 	ok = {}
-# 	for i in range(0,2**16):
-# 		# u = 2**15 | u
-# 		val = getNext(u + 2**16 + i)
-# 		# val = getNext(u + 2**16 +  i)
-# 		srand(val)
-# 		rand()
-# 		res = rand()
-# 		if res == iv[1] :
-# 			ok[cpt] = val
-# 			cpt+=1
-# 			break
-val = ok[1]
-for i in range(0,4):
-	val = getNext(val)
+	# srand(val[cursor])
 
-srand(val)
+	# for i in range(0,6):
+	# 	print(rand())
 
-for i in range(0,6):
-	print(rand())
-
-
-for i in range(0,4):
-	srand(val)
-
+	srand(val[cursor])
 
 	key = [rand(), rand(), rand(), rand()]
 	parameters = {'key':key}
 
-
 	print(parameters)
-result = server.query('validation/philippe', parameters)
-print(result)
+	try:
+		result = server.query('validation/philippe', parameters)
+		print(result)
+	except:
+		pass
+	cursor+=1
