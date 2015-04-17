@@ -1,6 +1,16 @@
 from client import *
 import random
 
+server = Server('http://pac.bouillaguet.info/TP4/ElGamal-forgery')
+
+result = server.query('/PK/philippe')
+
+p = result['p']
+h = result['h']
+g = result['g']
+q = p-1
+
+
 def XGCD(a, b):
 	u = (1,0)
 	v = (0,1)
@@ -15,18 +25,39 @@ def XGCD(a, b):
 
 
 
-s = Server('http://pac.bouillaguet.info/TP4/shifumi-deathmatch')
+server = Server('http://pac.bouillaguet.info/TP4/shifumi-deathmatch')
 
 
 #Démarre une partie
 
-result = s.query("/insert-coin/philippe")
+result = server.query("/insert-coin/philippe")
 # print(result)
 
-result = s.query("/start/philippe")
+result = server.query("/start/philippe")
 
-# print(result)
+print(result)
+foobar = result['foobar']
+y = 42
+g_y = pow(g, y, p)
+h_y = pow(h, y, p)
+m = 88275625857605 * h_y
 
-c = random.randrange(q)
-while XGCD(c, q)[0] != 1 :
-	c = random.randrange(q)
+PK = {'p':p, 'g':g, 'h':h}
+ciphertext = []
+ciphertext.append(g_y)
+ciphertext.append(m)
+commitment = {'PK':PK, 'ciphertext':ciphertext}
+parameters = {'foobar':foobar, 'commitment':commitment}
+
+print(parameters)
+try:
+	result = server.query("/move", parameters)
+	print(result)
+
+except:
+	pass
+
+parameters = {'move':'PIERRE', 'k':y, 'barfoo':result['barfoo']}
+
+result = server.query("/result")
+print(result)
